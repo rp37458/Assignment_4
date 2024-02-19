@@ -20,16 +20,13 @@ knitr::opts_chunk$set(echo = FALSE, include = TRUE, warning=FALSE,message=FALSE)
 
 ```{r}
 
-# Read the CSV file into R
 gasprice <- read.csv("gasprices.csv")
 
-# Load the ggplot2 library
 library(ggplot2)
 library(dplyr)
 library(mosaic)
 
 
-# Plot gas prices
 ggplot(gasprice, aes(x = Price, y = Competitors)) + 
   geom_boxplot() +
   labs(title = "Competition's Effect on Gas Prices", x = "Price", y = "Competitors") 
