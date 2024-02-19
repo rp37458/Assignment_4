@@ -1,0 +1,246 @@
+---
+title: "Assignment_4"
+author: "Ritesh Penumatsa"
+output: 
+  pdf_document:
+    toc: true
+    toc_depth: 3
+    number_sections: true
+    fig_caption: true
+    latex_engine: pdflatex
+date: "2024-02-16"
+---
+Student ID: rp37458
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, include = TRUE, warning=FALSE,message=FALSE)
+```
+
+## Question 1
+
+```{r}
+
+# Read the CSV file into R
+gasprice <- read.csv("gasprices.csv")
+
+# Load the ggplot2 library
+library(ggplot2)
+library(dplyr)
+library(mosaic)
+
+
+# Plot gas prices
+ggplot(gasprice, aes(x = Price, y = Competitors)) + 
+  geom_boxplot() +
+  labs(title = "Competition's Effect on Gas Prices", x = "Price", y = "Competitors") 
+```
+
+Gas stations charge more if they lack direct competition in sight. When looking 
+at the boxplot we can see the median of the boxplot with no competition is $0.05 more than gas prices with competitors. Even though there does not seem to
+be much difference at the minimum or first quartile. Gas prices with no 
+competitors are likely to charge more since the third quartile and median is greater than with competition. Overall, gas prices are on average likely to be greater with no competition than with competition. 
+
+
+```{r}
+
+ggplot(gasprice, aes(x = Income, y = Price)) + 
+  geom_point() +
+  labs(title = "A Person Income's Effect on Gas Prices", x = "Income", y = "Gas Price") +
+  geom_smooth(aes(x = Income, y = Price), method = "lm")
+
+
+
+
+```
+The richer the area, the higher the gas prices. When looking at the scatterplot,
+we can see there is a strong positive linear between someone's income and the 
+greater the gas prices are. We can tell as a person's income increases they will
+likely be charged with higher gas prices and viseversa. We can be safe to infer
+a person's income has some indication of greater gas prices. 
+
+
+```{r}
+
+ggplot(gasprice, aes(x = Stoplight, y = Price, fill = Stoplight)) +
+  geom_boxplot() +
+  labs(title = "Gas Prices vs. Stoplights", x = "Stoplight", y = "Gas Price")
+
+
+
+```
+Gas stations at stoplights charge more. Based on the boxplot, the median gas 
+price at a stoplight is about $1.87 and median gas price at no stoplight is 
+about $1.84. However, 50% of the gas prices for no stoplight falls within 1.78
+to 1.94 while 50% of gas prices for stoplight fall within 1.78 to 1.89. 
+Gas prices with no stoplight are more likely to have high outliers than with 
+a stoplight. We cannot conclude gas stations at stoplights charge more because 
+the interquartile range for gas stations with no stoplights is greater than that
+of with stoplight. 
+
+
+
+```{r}
+ggplot(gasprice, aes(x = Highway, y = Price)) + 
+  geom_boxplot() +
+  labs(title = "Highways's Effect on Gas Prices", x = "Highway Access", y = "Gas Price")
+
+```
+Gas stations with direct highway access charge more. The median gas price for 
+a gas station with direct highway access is greater than the median gas price
+without a direct highway access by about $0.5. The Q1, Median, and Q3 of gas
+stations with a direct highway access is greater than that of no highway access
+and these statistics are resistant to outliers. We can be safe to conclude gas
+stations with a direct highway access are more likely to charge more on average. 
+
+```{r}
+ggplot(gasprice, aes(x = Brand, y = Price, fill = Brand)) +
+  geom_boxplot() +
+  labs(title = "Gas Prices by Brand", x = "Brand", y = "Gas Price")
+
+
+```
+Shell charges more than all other non-Shell brands. The median (50% of the data)
+of Shell is greater than that of any other brand but similar to Chevron-Texaco.
+The Q3 of Shell gas prices is greater than any other brands meaning 75% of the 
+data is greater on Shell than other brands. But the IQR of Shell and Q1 is 
+comparable to others of other brands. So therefore we do not have enought 
+convincing evidence to conclude shell charges more than other brands. 
+
+## Question 2
+
+```{r}
+library(dplyr)
+
+sclass <- read.csv("sclass.csv")
+
+filtered_sclass <- sclass %>%
+  filter(year == 2011 & trim == "63 AMG")
+
+bootstrap_mileage <- do(10000) * mean(~mileage, data = resample(filtered_sclass))
+confint(bootstrap_mileage, level = 0.95)
+
+ggplot(filtered_sclass, aes(x=mileage)) + geom_histogram(fill = "skyblue", color = "black") + labs(title = "Distribution of Mileage")
+
+```
+We can be 95% confident that the average mileage of a car with a year 2011 
+and a trim of 63 AMG will fall within 26,303.84 and 31,827.78 miles. 
+
+
+
+```{r}
+selected_sclass <- sclass %>%
+  filter(year == 2014 & trim == "550") %>%
+  mutate(isBlack = ifelse(color == "Black", TRUE, FALSE))
+
+bootstrap_black_car <- do(10000) * prop(~isBlack, data = resample(selected_sclass))
+confint(bootstrap_black_car, level = 0.95)
+
+isBlack_counts <- count(selected_sclass, isBlack)
+ggplot(isBlack_counts, aes(x = isBlack, y = n)) +
+  geom_bar(stat = "identity", fill = "darkgray", color = "black") + labs(title
+  = "Number of Black vs Non-Black Cars for the Sample", y = "Count", x = "isBlack")
+
+```
+We are 95% confident that the sample proportion of a car being painted black 
+given a year of 2014 and a trim of 550 will fall within the intervals of 0.417
+and 0.453. 
+
+## Question 3
+
+```{r}
+pilot <- read.csv("nbc_pilotsurvey.csv")
+
+filtered_pilot <- pilot %>% 
+  filter(Show == "Living with Ed" | Show == "My Name is Earl")
+
+nrow(filtered_pilot) ## Checking if sample size is large enough
+
+mean(Viewer ~ Q1_Happy, data = filtered_pilot)
+
+bootsample_diff_mean <- diffmean(Viewer ~ Q1_Happy, data = filtered_pilot, 
+                                 only.2 = FALSE)
+
+confint(bootsample_diff_mean, level = 0.95)
+
+ggplot(filtered_pilot, aes(x = Viewer, fill = Q1_Happy)) +
+  geom_histogram(color = "black") + labs(title = "Viewers who found Q1 Happy")
+
+
+
+```
+
+We do not have convincing evidence of the show producing a higher average
+Q1_Happy response among viewers since within our 95% confidence interval it 
+contains 0. 
+
+```{r}
+filter_pilot <- pilot %>% 
+  filter(Show == "The Biggest Loser" | Show == "The Apprentice: Los Angeles")
+
+nrow(filter_pilot) ## Checking if sample size is large enough
+
+
+diffmean(Viewer ~ Q1_Annoyed, data = filter_pilot, only.2 = FALSE)
+
+boostrap_diffmean <- diffmean(Viewer ~ Q1_Annoyed, data = filter_pilot, only.2 = FALSE)
+
+confint(boostrap_diffmean, level = 0.95)
+
+ggplot(filter_pilot, aes(x = Viewer, y = Q1_Annoyed)) + 
+  geom_histogram(stat = "identity", color = "black") + 
+  labs(title = "Viewers who found Q1 Annoying")
+```
+
+We do have convincing evidence of a show having a higher mean Q1_Annoyed
+response among its viewers. Since the 95% confidence interval does not contain 
+0. 
+
+
+```{r}
+select_pilot <- pilot %>% 
+  filter(Show == "Dancing with the Stars")
+
+nrow(select_pilot) ## Checking if sample size is large enough
+
+confuse <- prop(~ Q2_Confusing >= 4, data = select_pilot)
+
+confint(confuse, level = 0.95)
+select_pilot$label <- ifelse(select_pilot$Q2_Confusing >= 4, "4 or 5", "Others")
+
+ggplot(select_pilot) + geom_histogram(aes(x=Q2_Confusing, fill=label)) + scale_fill_manual(values = c("4 or 5" = "blue", "Others" = "gray")) + 
+  labs(title = "Number People who Found Q2 Confusing")
+```
+
+We can expect approxiamtely a proportion of 0.0773 find Q2_Confusing for the 
+given show. We can tell from the 95% confidence interval that many people did 
+not find Q2 Confusing as about 7% found it confusing. 
+
+
+## Question 4
+
+```{r}
+ebay <- read.csv("ebay.csv")
+
+mean(rev_ratio ~ adwords_pause, data = ebay)
+diffmean(rev_ratio ~ adwords_pause, data = ebay)
+
+
+bootsample_revenue_diff <- do(10000) * diffmean(rev_ratio ~ adwords_pause, data = resample(ebay))
+
+
+confint(bootsample_revenue_diff, level = 0.95)
+
+
+ggplot(bootsample_revenue_diff) + geom_histogram(aes(x=diffmean)) 
+
+```
+
+The question being asked is there a difference in revenue ratio between the 
+control and treatment DMA? To answer this question I bootstrapped 10000 
+samples of the difference in mean of revenue ratio for control and treatment
+DMA. The results I used was a histogram displaying the differerence in mean for
+the bootstrap samples and a 95% confidence interval. 
+
+When taking the 95% confidence interval, I found out there was significant
+evidence of a different in mean of revenure ration between control and treatment
+since the interval does not contain 0. 
